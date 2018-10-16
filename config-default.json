@@ -1,0 +1,9 @@
+{
+    "channel": "CHANNEL_ID_TO_POST_STREAMS",
+    "debug": 1,
+    "delay": 60,
+    "login_token": "YOUR_DISCORD_BOT_TOKEN",
+    "mrkey": "SECRET",
+    "server_id": "DISCORD_SERVER_ID",
+    "streamers": {}
+}
