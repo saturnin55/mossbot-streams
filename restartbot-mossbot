@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# path to your bot directory
+BOTHOME="/home/someting/somethingelse"
+
+# user that is running the bot
+BOTUSER="your_bot_user"
+
+# uid of your bot user
+BOTUID=`id -u $BOTUSER`
+
+pkill -f -u $BOTUSER "python3.6 mossbot-streams.py"
+
+cd $BOTHOME
+
+if [ "$EUID"  -eq "$BOTUID" ]
+then
+   python3.6 mossbot-streams.py&
+elif [ "$EUID"  -eq "0" ]
+then
+   sudo -u crocbot $BOTHOME/restartbot-mossbot
+fi
