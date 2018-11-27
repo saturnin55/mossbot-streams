@@ -5,5 +5,4 @@
     "login_token": "YOUR_DISCORD_BOT_TOKEN",
     "mrkey": "SECRET",
     "server_id": "DISCORD_SERVER_ID",
-    "streamers": {}
 }
