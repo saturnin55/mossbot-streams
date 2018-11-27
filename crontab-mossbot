@@ -1,0 +1,5 @@
+#!bin/bash
+# copy this file in /etc/cron.hourly to restart the bot every hour
+# there's a bug and the bot goes into limbo. haven't find out yet why.
+BOTHOME=/home/something/somewhere
+$BOTHOME/restartbot-mossbot
