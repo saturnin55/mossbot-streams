@@ -1,0 +1,11 @@
+#!/bin/bash
+BOTHOME="/path/to/bothome"
+
+
+pid=`pgrep -f "python3.6 mossbot-streams.py"`
+
+if [ -z $pid ]
+then
+   $BOTHOME/bin/restartbot-mossbot&
+   echo "Restarting mossbot... " >> $BOTHOME/mossbot.log
+fi
