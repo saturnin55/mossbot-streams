@@ -1,3 +1,5 @@
+#!/usr/bin/python3.6
+from pprint import pprint
 import discord
 import asyncio
 import json
@@ -55,8 +57,8 @@ async def background_task():
    http = urllib3.PoolManager()
 
    url = "https://mossranking.com/api/gettwitchstreamers.php?key={0}".format(KEY)
-   while not client.is_closed:
-
+   
+   while not client.is_closed():
       try:
          if config["debug"] > 0:
             mylog("Fetching {0}".format(url))
@@ -68,6 +70,7 @@ async def background_task():
          await asyncio.sleep(config["delay"])
          continue;
 
+      channel = client.get_channel(int(config["channel"]));
       twitch = []
       for item in data:
          if config["debug"] > 0:
@@ -89,7 +92,8 @@ async def background_task():
 
             try:
                mylog("{0} started streaming\n".format(item["twitch"]))
-               msg = await client.send_message(discord.Object(id=config["channel"]), embed=embed)
+               msg = await channel.send(embed=embed)
+               #msg = await client.send_message(discord.Object(id=config["channel"]), embed=embed)
             except Exception as e:
                mylog("ERR: cant send start of stream discord msg : {0}".format(e))
                continue
@@ -102,7 +106,7 @@ async def background_task():
 
             if config["debug"] == 2:
                try:
-                  await client.send_message(discord.Object(id=config["channel"]), "DEBUG: {0} started streaming".format(item["twitch"]))
+                  await channel.send("DEBUG: {0} started streaming".format(item["twitch"]))
                except Exception as e:
                   mylog("ERR: can't send start of stream discord debug message: {0}".format(e))
                   continue
@@ -124,8 +128,8 @@ async def background_task():
                embed.set_footer(text="@mossranking | https://mossranking.com", icon_url="https://i.imgur.com/2ZpHHKm.png")
 
                try:
-                  msg = await client.get_message(discord.Object(id=config["channel"]), msgid)
-                  msg = await client.edit_message(msg, embed=embed)
+                  msg = await channel.fetch_message(int(msgid))
+                  msg.edit(embed=embed)
                except Exception as e:
                   mylog("ERR: can't retrieve or edit msgid {0} for {1}: {2}".format(msgid, item["twitch"], e))
                   continue
@@ -141,7 +145,7 @@ async def background_task():
 
                if config["debug"] == 2:
                   try:
-                     await client.send_message(discord.Object(id=config["channel"]), "DEBUG: edited {0}".format(item["twitch"]))
+                     await channel.send("DEBUG: edited {0}".format(item["twitch"]))
                   except Exception as e:
                      mylog("ERR: sending debug msg edited {0}".format(e))
                      continue
@@ -154,7 +158,6 @@ async def background_task():
 
       for streamer in mrstreamers:
          if streamer not in twitch:
-            #mylog("-> {0} NOT IN {1}".format(streamer, twitch))
             if "msgid" in streamers_config["streamers"][streamer]:
                msgid = streamers_config["streamers"][streamer]["msgid"]
 
@@ -166,8 +169,8 @@ async def background_task():
 
                if streamers_config["streamers"][streamer]["delerr"] < 5:
                   try:
-                     msg = await client.get_message(discord.Object(id=config["channel"]), msgid)
-                     await client.delete_message(msg)
+                     msg = await channel.fetch_message(int(msgid))
+                     await msg.delete()
                   except Exception as e:
                         mylog("Cant retreive or delete message {0} for {1}: {2}".format(msgid, streamer, e))
                         streamers_config["streamers"][streamer]["delerr"] += 1
@@ -176,17 +179,19 @@ async def background_task():
 
                   if config["debug"] == 2:
                      try:
-                        await client.send_message(discord.Object(id=config["channel"]), "DEBUG: {0} stopped streaming".format(streamer))
+                        await channel.send("DEBUG: {0} stopped streaming".format(streamer))
                      except Exception as e:
                         mylog("Can't send debug message to delete {0} {1}".format(streamer, e))
                         continue
                else:
                   mylog("Too many tries deleting msgid {0} for {1}".format(msgid, streamer))
 
+
             del streamers_config["streamers"][streamer]
             mylog("==> {0} stopped streaming|".format(item["twitch"]))
 
          write_config(streamers_file, streamers_config)
+
 
       await asyncio.sleep(config["delay"])
 
@@ -198,11 +203,3 @@ except Exception as e:
    mylog("ERR8: {0}".format(e))
    client.loop.run_until_complete(client.close())
    client.loop.close()
-#finally:
-   #mylog("ERR9: finally")
-   #task.cancel()
-   #try:
-   #   mylog("RESTARTING background_task()")
-   #   client.loop.run_until_complete(background_task())
-   #except Exception:
-   #   pass
