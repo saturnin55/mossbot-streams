@@ -93,7 +93,6 @@ async def background_task():
             try:
                mylog("{0} started streaming\n".format(item["twitch"]))
                msg = await channel.send(embed=embed)
-               #msg = await client.send_message(discord.Object(id=config["channel"]), embed=embed)
             except Exception as e:
                mylog("ERR: cant send start of stream discord msg : {0}".format(e))
                continue
